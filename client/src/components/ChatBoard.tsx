@@ -1,24 +1,33 @@
 import React from 'react';
 import styled from 'styled-components';
-
-interface Props {}
+import ChatRoom from './ChatRoom';
 
 const Wrapper = styled.div`
   height: 100vh;
   width: 100vw;
   display: flex;
   justify-content: center;
+  background-color: rgba(243, 244, 246);
 `;
 
 const Container = styled.div`
-  width: 80%;
-  background-color: red;
+  width: 95%;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
+
+interface Props {}
 
 const ChatBoard = (props: Props) => {
   return (
     <Wrapper>
-      <Container>ss </Container>
+      <Container>
+        <ChatRoom />
+        <ChatRoom />
+        <ChatRoom />
+      </Container>
     </Wrapper>
   );
 };

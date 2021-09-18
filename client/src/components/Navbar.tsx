@@ -10,7 +10,7 @@ const Container = styled.div`
 `;
 
 const Wrapper = styled.div`
-  padding: 10px 20px;
+  padding: 10px 2.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;

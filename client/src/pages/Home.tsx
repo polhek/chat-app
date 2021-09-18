@@ -1,5 +1,3 @@
-import React from 'react';
-import styled from 'styled-components';
 import ChatBoard from '../components/ChatBoard';
 import Navbar from '../components/Navbar';
 
