@@ -1,10 +1,13 @@
 // dependencies
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const http = require('http');
 require('dotenv').config();
 
 const app = express();
+// routes
+const authRoute = require('./routes/auth');
 
 // Mongoose connection...
 const MONGO_URL = process.env.MONGO_URL;
@@ -25,6 +28,9 @@ mongoConnection();
 
 const server = http.createServer(app);
 
+app.use(express.json());
+app.use(cors());
+
 app.get('/', (req, res) => {
   res.send('<h1>Chat app - server </h1>');
 });
@@ -33,3 +39,5 @@ app.get('/', (req, res) => {
 server.listen(5000, () => {
   console.log('Server running on port 3000!');
 });
+
+app.use('/api/auth', authRoute);

@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import { initialState, userReducer } from './context/reducers';
+import { initialState } from './context/reducers';
 import { UserProvider } from './context/userContext';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
-////reducer={userReducer}
+
 function App() {
   return (
     <UserProvider initialState={initialState}>

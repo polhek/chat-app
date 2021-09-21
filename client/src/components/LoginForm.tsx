@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { userLogin } from '../context/actions';
+import { useAuthDispatch } from '../context/userContext';
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -72,9 +74,15 @@ interface Props {}
 const LoginForm = (props: Props) => {
   const [user, setUsername] = useState<String>('');
 
+  const authDispatch = useAuthDispatch();
+
+  console.log(authDispatch);
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     //! still to do...
+    let payload = { user };
+
+    userLogin(authDispatch, payload);
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
