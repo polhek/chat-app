@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router';
 import styled from 'styled-components';
 import { userLogin } from '../context/actions';
 import { useAuthDispatch } from '../context/userContext';
@@ -72,17 +73,19 @@ const SubmitButton = styled.button`
 interface Props {}
 
 const LoginForm = (props: Props) => {
+  let history = useHistory();
   const [user, setUsername] = useState<String>('');
 
   const authDispatch = useAuthDispatch();
 
-  console.log(authDispatch);
-  const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    //! still to do...
-    let payload = { user };
-
-    userLogin(authDispatch, payload);
+    let payload = { userName: user };
+    try {
+      let response = await userLogin(authDispatch, payload);
+      if (!response.user) return;
+      history.push('/');
+    } catch (error) {}
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
