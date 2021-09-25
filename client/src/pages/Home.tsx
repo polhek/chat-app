@@ -12,6 +12,14 @@ const Home = (props: Props) => {
   const socket = useSocket();
   const { isAuth, user } = value;
 
+  //if authenticated, connect to socket server, and attach username...
+  if (isAuth) {
+    if (socket) {
+      socket.auth = { userName: user.userName };
+      socket.connect();
+    }
+  }
+
   if (!isAuth) {
     return <Redirect to="/login" />;
   }

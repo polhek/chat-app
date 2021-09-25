@@ -5,16 +5,9 @@ import {
   useEffect,
   useState,
 } from 'react';
-import io from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
-interface IState {
-  socket: any;
-}
-const iState = {
-  socket: '',
-};
-
-const SocketContext = createContext<IState | undefined>(iState);
+const SocketContext = createContext<Socket | null>(null);
 
 export const useSocket = () => {
   return useContext(SocketContext);
@@ -26,17 +19,28 @@ interface Props {
 }
 
 export const SocketProvider = ({ children }: Props) => {
-  const [socket, setSocket] = useState<any>();
-  console.log(socket);
-  useEffect(() => {
-    const newSocket = io('http://localhost:5000');
+  const [socket, setSocket] = useState<Socket | null>(null);
 
+  useEffect(() => {
+    const newSocket = io('http://localhost:5000', { autoConnect: false });
+
+    //for development only...
+    newSocket.onAny((event, ...args) => {
+      console.log(event, args);
+    });
     newSocket.on('connect', () => {
-      console.log('connected');
+      console.log('Connected ');
+    });
+
+    newSocket.on('connect_error', (err) => {
+      if (err.message === 'invalid username') {
+        console.log('Neki ne štima');
+      }
     });
     setSocket(newSocket);
 
     return () => {
+      newSocket.off('connect_error');
       newSocket.close();
     };
   }, []);

@@ -1,6 +1,12 @@
 import { createContext, ReactElement, useReducer, useContext } from 'react';
 
-import { actionTypes, initialState, IState, userReducer } from './reducers';
+import {
+  actionTypes,
+  initialState,
+  IState,
+  User,
+  userReducer,
+} from './reducers';
 
 export const UserContext = createContext<IState | any>(initialState);
 

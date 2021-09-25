@@ -3,7 +3,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
-
+const {
+  socketConnection,
+  userAuth,
+  onConnection,
+  notifyUsers,
+} = require('./config/sockets');
 require('dotenv').config();
 import './config/mongo';
 
@@ -14,22 +19,10 @@ const app = express();
 const server = http.createServer(app);
 
 // socket connection...
-const io = require('socket.io')(server, {
-  transports: ['websocket', 'polling', 'flashsocket'],
-  cors: {
-    origin: 'http://localhost:3000',
-  },
-});
-
-io.on('connection', (socket) => {
-  console.log('User is connected!');
-
-  socket.on('disconnect', () => {
-    console.log(`User socket ${socket.id} has disconnected!`);
-  });
-});
-
-export { io };
+socketConnection(server);
+userAuth();
+onConnection();
+notifyUsers();
 
 app.use(express.json());
 app.use(cors());

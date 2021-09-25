@@ -70,7 +70,12 @@ const JoinChat = styled.button`
   }
 `;
 
-const ChatRoom = (props: Props) => {
+interface Props {
+  key: String;
+  userName: String;
+}
+
+const ChatRoom = ({ userName }: Props) => {
   return (
     <Contact>
       <Left>
@@ -80,7 +85,7 @@ const ChatRoom = (props: Props) => {
           className="avatar"
         />
         <Info>
-          <Username>Žiga Grošelj</Username>
+          <Username>{userName}</Username>
           <LastMessage>
             Lorem Ipsum is simply dummy text of the printing and typesetting
             industry.
