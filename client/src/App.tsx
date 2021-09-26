@@ -3,6 +3,7 @@ import { initialState } from './context/reducers';
 import { SocketProvider } from './context/SocketProvider';
 
 import { UserProvider } from './context/userContext';
+import Chat from './pages/Chat';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -19,6 +20,7 @@ function App() {
             <Route path="/" exact>
               <Home />
             </Route>
+            <Route path="/chat/:userName" component={Chat} />
           </Switch>
         </Router>
       </UserProvider>

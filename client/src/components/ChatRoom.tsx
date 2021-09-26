@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-
+import { Link } from 'react-router-dom';
 interface Props {}
 
 const Contact = styled.div`
@@ -73,9 +73,10 @@ const JoinChat = styled.button`
 interface Props {
   key: String;
   userName: String;
+  userID: string;
 }
 
-const ChatRoom = ({ userName }: Props) => {
+const ChatRoom = ({ userName, userID }: Props) => {
   return (
     <Contact>
       <Left>
@@ -94,7 +95,9 @@ const ChatRoom = ({ userName }: Props) => {
       </Left>
       <Right>
         <Timestamp>12:34</Timestamp>
-        <JoinChat>Join</JoinChat>
+        <Link to={{ pathname: `/chat/${userName}`, state: { userID } }}>
+          <JoinChat>Join</JoinChat>
+        </Link>
       </Right>
     </Contact>
   );

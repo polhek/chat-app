@@ -40,7 +40,6 @@ const ChatBoard = (props: Props) => {
 
     return () => {
       socket.off('users');
-      socket.off('user-connected');
     };
   });
 
@@ -58,7 +57,13 @@ const ChatBoard = (props: Props) => {
     <Wrapper>
       <Container>
         {loggedUsers.map((user: any) => {
-          return <ChatRoom key={user?.userID} userName={user.userName} />;
+          return (
+            <ChatRoom
+              key={user?.userID}
+              userName={user.userName}
+              userID={user?.userID}
+            />
+          );
         })}
       </Container>
     </Wrapper>
