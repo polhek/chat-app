@@ -33,6 +33,6 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoute);
 
 // server listening on port 5000...
-server.listen(5000, () => {
+server.listen(4000, () => {
   console.log('Server running on port 5000!');
 });

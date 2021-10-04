@@ -36,6 +36,14 @@ exports.onConnection = () => {
       users.push({ userID: id, userName: socket.userName });
     }
     socket.emit('users', users);
+
+    socket.on('private-message', ({ message, to }) => {
+      console.log(message);
+      socket.to(to).emit('private message', {
+        message,
+        from: socket.id,
+      });
+    });
   });
 };
 

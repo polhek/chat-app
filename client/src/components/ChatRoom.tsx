@@ -95,7 +95,9 @@ const ChatRoom = ({ userName, userID }: Props) => {
       </Left>
       <Right>
         <Timestamp>12:34</Timestamp>
-        <Link to={{ pathname: `/chat/${userName}`, state: { userID } }}>
+        <Link
+          to={{ pathname: `/chat/${userName}`, state: { userID, userName } }}
+        >
           <JoinChat>Join</JoinChat>
         </Link>
       </Right>

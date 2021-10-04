@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useSocket } from '../context/SocketProvider';
+import { useUsers } from '../context/UsersProvider';
 import ChatRoom from './ChatRoom';
 
 const Wrapper = styled.div`
@@ -22,8 +23,11 @@ const Container = styled.div`
 interface Props {}
 
 const ChatBoard = (props: Props) => {
-  const [loggedUsers, setLoggedUsers] = useState<any[]>([]);
+  //const [loggedUsers, setLoggedUsers] = useState<any[]>([]);
   const socket = useSocket();
+  const { loggedUsers, addUser, sortUsers } = useUsers();
+
+  console.log(loggedUsers);
 
   useEffect(() => {
     if (socket == null) return;
@@ -33,9 +37,7 @@ const ChatBoard = (props: Props) => {
     });
 
     socket.on('user-connected', (user: any) => {
-      const users: any[] = loggedUsers;
-      users.push(user);
-      setLoggedUsers(users);
+      addUser(user);
     });
 
     return () => {
@@ -43,26 +45,12 @@ const ChatBoard = (props: Props) => {
     };
   });
 
-  const sortUsers = (users: any) => {
-    let sorted = users.sort((a: any, b: any) => {
-      if (a.self) return -1;
-      if (b.self) return 1;
-      if (a.username < b.username) return -1;
-      return a.username > b.username ? 1 : 0;
-    });
-    setLoggedUsers(sorted);
-  };
-
   return (
     <Wrapper>
       <Container>
-        {loggedUsers.map((user: any) => {
+        {loggedUsers.map((u) => {
           return (
-            <ChatRoom
-              key={user?.userID}
-              userName={user.userName}
-              userID={user?.userID}
-            />
+            <ChatRoom key={u.userID} userName={u.userName} userID={u.userID} />
           );
         })}
       </Container>

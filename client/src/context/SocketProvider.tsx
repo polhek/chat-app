@@ -22,7 +22,7 @@ export const SocketProvider = ({ children }: Props) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5000', { autoConnect: false });
+    const newSocket = io('http://localhost:4000', { autoConnect: false });
 
     //for development only...
     newSocket.onAny((event, ...args) => {

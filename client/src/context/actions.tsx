@@ -1,4 +1,4 @@
-const ROOT_URL: String = 'http://localhost:5000/api';
+const ROOT_URL: String = 'http://localhost:4000/api';
 
 export const userLogin = async (dispatch: any, loginPayload: any) => {
   const requestOptions = {
