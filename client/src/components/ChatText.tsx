@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { ArrowBack, Send } from '@material-ui/icons';
 import { useSocket } from '../context/SocketProvider';
 import { useUsers } from '../context/UsersProvider';
+import { v4 as uuidv4 } from 'uuid';
 
 interface State {
   userID: string;
@@ -71,7 +72,7 @@ const MessageInput = styled.input`
 
 const SendButton = styled.button``;
 const ChatText = ({ userName, state }: Props) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [mess, setMess] = useState<string>('');
   const socket = useSocket();
   const { loggedUsers } = useUsers();
@@ -79,48 +80,58 @@ const ChatText = ({ userName, state }: Props) => {
   useEffect(() => {
     if (socket == null) return;
 
-    listenerMessage();
-
+    socket.on('private message', listenerMessage);
     return () => {
-      listenerMessage();
+      socket.off('private message', listenerMessage);
     };
-  }, []);
+  });
 
-  const listenerMessage = () => {
-    socket?.on('private message', ({ message, from }) => {
-      //console.log('new', message, 'fr', from);
+  const listenerMessage = async (msgInfo: any) => {
+    console.log(msgInfo);
+    console.log(msgInfo.from);
+    for (let i = 0; i < loggedUsers.length; i++) {
+      const user = loggedUsers[i];
+      if (user.userID === msgInfo.from) {
+        user.messages.push({
+          message: msgInfo.message,
+          fromSelf: false,
+        });
 
-      //TODO:
-      for (let i = 0; i < loggedUsers.length; i++) {
-        const user = loggedUsers[i];
-        if (user.userID === from) {
-          console.log(user);
-          user.messages = [];
-          user.messages.push({ message: message, fromSelf: false });
-          if (user !== state.userID) {
-            user.hasNewMessages = true;
-          }
-          console.log(loggedUsers);
-          break;
+        if (user !== state.userID) {
+          user.hasNewMessages = true;
         }
+        getMessages();
+        break;
       }
-    });
+    }
   };
 
   const onMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (state.userName) {
-      console.log(mess);
       socket?.emit('private-message', {
         message: mess,
         to: state.userID,
       });
+      for (let i = 0; i < loggedUsers.length; i++) {
+        const user = loggedUsers[i];
+        if (user.userID === state.userID) {
+          user.messages.push({ message: mess, fromSelf: true });
+          console.log(user);
+        }
+      }
+      getMessages();
     }
-    console.log(loggedUsers);
+
     setMess('');
   };
 
-  console.log(mess);
+  const getMessages = () => {
+    const selUser = loggedUsers.find((user) => {
+      return user.userID === state.userID;
+    });
+    setMessages(selUser.messages);
+  };
 
   return (
     <Wrapper>
@@ -130,7 +141,7 @@ const ChatText = ({ userName, state }: Props) => {
       </ChatHeader>
       <Container>
         {messages.map((m) => {
-          return <p>{m.message}</p>;
+          return <p key={uuidv4()}>{m.message}</p>;
         })}
       </Container>
       <NewMessage>

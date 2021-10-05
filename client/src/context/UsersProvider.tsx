@@ -4,17 +4,20 @@ import React, {
   useContext,
   useState,
 } from 'react';
+import { useSocket } from './SocketProvider';
 
 export const inState = {
   loggedUsers: [],
   addUser: (user: any) => {},
   sortUsers: (user: any) => {},
+  setLoggedUsers: () => {},
 };
 
 export interface initState {
   loggedUsers: any[];
   addUser(user: any): void;
   sortUsers(users: any): void;
+  setLoggedUsers: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 const UsersContext = createContext<initState>(inState);
@@ -29,6 +32,7 @@ interface Props {
 
 export const UsersProvider = ({ children }: Props) => {
   const [loggedUsers, setLoggedUsers] = useState<any[]>([]);
+  const socket = useSocket();
 
   const addUser = (user: any) => {
     console.log(typeof loggedUsers);
@@ -38,6 +42,10 @@ export const UsersProvider = ({ children }: Props) => {
   };
 
   const sortUsers = (users: any) => {
+    users.forEach((user: any) => {
+      user.self = user.userID === socket?.id;
+    });
+
     let sorted = users.sort((a: any, b: any) => {
       if (a.self) return -1;
       if (b.self) return 1;
@@ -48,7 +56,9 @@ export const UsersProvider = ({ children }: Props) => {
   };
 
   return (
-    <UsersContext.Provider value={{ loggedUsers, addUser, sortUsers }}>
+    <UsersContext.Provider
+      value={{ loggedUsers, setLoggedUsers, addUser, sortUsers }}
+    >
       {children}
     </UsersContext.Provider>
   );

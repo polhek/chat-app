@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { useSocket } from '../context/SocketProvider';
 import { useUsers } from '../context/UsersProvider';
@@ -25,9 +25,7 @@ interface Props {}
 const ChatBoard = (props: Props) => {
   //const [loggedUsers, setLoggedUsers] = useState<any[]>([]);
   const socket = useSocket();
-  const { loggedUsers, addUser, sortUsers } = useUsers();
-
-  console.log(loggedUsers);
+  const { loggedUsers, setLoggedUsers, addUser, sortUsers } = useUsers();
 
   useEffect(() => {
     if (socket == null) return;
@@ -37,9 +35,50 @@ const ChatBoard = (props: Props) => {
     });
 
     socket.on('user-connected', (user: any) => {
+      console.log(user, 'user ta je');
       addUser(user);
     });
 
+    socket.on('disconnect', () => {
+      console.log('disconnect');
+      const users = loggedUsers;
+      users.forEach((user) => {
+        if (user.self === true) {
+          user.connected = false;
+        }
+      });
+      setLoggedUsers(users);
+    });
+
+    socket.on('connect', () => {
+      const users = loggedUsers;
+      users.forEach((u) => {
+        if (u.self) {
+          u.connected = true;
+        }
+      });
+      setLoggedUsers(users);
+    });
+
+    socket.on('disconnect', () => {
+      const users = loggedUsers;
+      users.forEach((u) => {
+        if (u.self) {
+          u.connected = false;
+        }
+      });
+      setLoggedUsers(users);
+    });
+
+    socket.on('user-disconnected', (userID) => {
+      const users = loggedUsers;
+      users.forEach((u) => {
+        if (u.userID === userID) {
+          u.connected = false;
+        }
+      });
+      setLoggedUsers(users);
+    });
     return () => {
       socket.off('users');
     };
@@ -50,7 +89,13 @@ const ChatBoard = (props: Props) => {
       <Container>
         {loggedUsers.map((u) => {
           return (
-            <ChatRoom key={u.userID} userName={u.userName} userID={u.userID} />
+            <ChatRoom
+              key={u.userID}
+              userName={u.userName}
+              userID={u.userID}
+              messages={u.messages}
+              status={u.connected}
+            />
           );
         })}
       </Container>

@@ -1,3 +1,5 @@
+const { Socket } = require('socket.io');
+
 let io;
 
 exports.socketConnection = (server) => {
@@ -11,8 +13,14 @@ exports.socketConnection = (server) => {
   io.on('connection', (socket) => {
     console.log('User is connected!');
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       console.log(`User socket ${socket.id} has disconnected!`);
+      const matchSocket = await io.in(socket.id).allSockets();
+
+      const isDisconnected = matchSocket.size === 0;
+      if (isDisconnected) {
+        socket.broadcast.emit('user-disconnected', socket.id);
+      }
     });
   });
 };
@@ -33,7 +41,13 @@ exports.onConnection = () => {
   io.on('connection', (socket) => {
     const users = [];
     for (let [id, socket] of io.of('/').sockets) {
-      users.push({ userID: id, userName: socket.userName });
+      users.push({
+        userID: id,
+        userName: socket.userName,
+        messages: [],
+        self: false,
+        connected: true,
+      });
     }
     socket.emit('users', users);
 
@@ -52,6 +66,9 @@ exports.notifyUsers = () => {
     socket.broadcast.emit('user-connected', {
       userID: socket.id,
       userName: socket.userName,
+      messages: [],
+      self: false,
+      connected: true,
     });
   });
 };

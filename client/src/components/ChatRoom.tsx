@@ -74,9 +74,11 @@ interface Props {
   key: String;
   userName: String;
   userID: string;
+  status: boolean;
+  messages: any[];
 }
 
-const ChatRoom = ({ userName, userID }: Props) => {
+const ChatRoom = ({ userName, userID, status, messages }: Props) => {
   return (
     <Contact>
       <Left>
@@ -87,16 +89,16 @@ const ChatRoom = ({ userName, userID }: Props) => {
         />
         <Info>
           <Username>{userName}</Username>
-          <LastMessage>
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry.
-          </LastMessage>
+          <LastMessage>{status.toString()}</LastMessage>
         </Info>
       </Left>
       <Right>
         <Timestamp>12:34</Timestamp>
         <Link
-          to={{ pathname: `/chat/${userName}`, state: { userID, userName } }}
+          to={{
+            pathname: `/chat/${userName}`,
+            state: { userID, userName, messages },
+          }}
         >
           <JoinChat>Join</JoinChat>
         </Link>
