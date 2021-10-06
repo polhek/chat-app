@@ -10,8 +10,8 @@ import Login from './pages/Login';
 
 function App() {
   return (
-    <SocketProvider>
-      <UsersProvider>
+    <UsersProvider>
+      <SocketProvider>
         <UserProvider initialState={initialState}>
           <Router>
             <Switch>
@@ -25,8 +25,8 @@ function App() {
             </Switch>
           </Router>
         </UserProvider>
-      </UsersProvider>
-    </SocketProvider>
+      </SocketProvider>
+    </UsersProvider>
   );
 }
 

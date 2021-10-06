@@ -31,17 +31,17 @@ const ChatBoard = (props: Props) => {
     if (socket == null) return;
 
     socket.on('users', (users) => {
-      sortUsers(users);
+      const socketID: string = socket.id;
+      sortUsers(users, socketID);
     });
 
     socket.on('user-connected', (user: any) => {
-      console.log(user, 'user ta je');
-      addUser(user);
+      addUser(user); //todo
     });
 
     socket.on('disconnect', () => {
       console.log('disconnect');
-      const users = loggedUsers;
+      const users = [...loggedUsers];
       users.forEach((user) => {
         if (user.self === true) {
           user.connected = false;
@@ -51,7 +51,7 @@ const ChatBoard = (props: Props) => {
     });
 
     socket.on('connect', () => {
-      const users = loggedUsers;
+      const users = [...loggedUsers];
       users.forEach((u) => {
         if (u.self) {
           u.connected = true;
@@ -61,7 +61,7 @@ const ChatBoard = (props: Props) => {
     });
 
     socket.on('disconnect', () => {
-      const users = loggedUsers;
+      const users = [...loggedUsers];
       users.forEach((u) => {
         if (u.self) {
           u.connected = false;
@@ -71,7 +71,7 @@ const ChatBoard = (props: Props) => {
     });
 
     socket.on('user-disconnected', (userID) => {
-      const users = loggedUsers;
+      const users = [...loggedUsers];
       users.forEach((u) => {
         if (u.userID === userID) {
           u.connected = false;

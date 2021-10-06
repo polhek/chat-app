@@ -9,14 +9,14 @@ import { useSocket } from './SocketProvider';
 export const inState = {
   loggedUsers: [],
   addUser: (user: any) => {},
-  sortUsers: (user: any) => {},
+  sortUsers: (user: any, socketID: string) => {},
   setLoggedUsers: () => {},
 };
 
 export interface initState {
   loggedUsers: any[];
   addUser(user: any): void;
-  sortUsers(users: any): void;
+  sortUsers(users: any, socketID: string): void;
   setLoggedUsers: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
@@ -36,14 +36,17 @@ export const UsersProvider = ({ children }: Props) => {
 
   const addUser = (user: any) => {
     console.log(typeof loggedUsers);
-    const users: any[] = loggedUsers;
+    const users: any[] = [...loggedUsers];
     users.push(user);
     setLoggedUsers(users);
   };
 
-  const sortUsers = (users: any) => {
-    users.forEach((user: any) => {
-      user.self = user.userID === socket?.id;
+  const sortUsers = (users: any, socketID: string) => {
+    const usersCopy = [...users];
+    console.log('users copy: ', usersCopy);
+    console.log('socketid', socketID);
+    usersCopy.forEach((user: any) => {
+      user.self = user.userID === socketID;
     });
 
     let sorted = users.sort((a: any, b: any) => {
@@ -52,7 +55,8 @@ export const UsersProvider = ({ children }: Props) => {
       if (a.username < b.username) return -1;
       return a.username > b.username ? 1 : 0;
     });
-    setLoggedUsers(sorted);
+    console.log('sorted', sorted);
+    setLoggedUsers([...sorted]);
   };
 
   return (

@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  MutableRefObject,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 import { ArrowBack, Send } from '@material-ui/icons';
 import { useSocket } from '../context/SocketProvider';
@@ -18,6 +24,11 @@ interface Props {
 interface Message {
   userName: string;
   message: string;
+}
+
+interface MessageProps {
+  fromSelf: boolean;
+  ref?: React.Ref<HTMLDivElement | null>;
 }
 const Wrapper = styled.div`
   height: 100vh;
@@ -41,13 +52,35 @@ const ChatHeader = styled.div`
 `;
 
 const Container = styled.div`
-  background-color: red;
   width: 95%;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   height: 70%;
+  overflow: scroll;
+`;
+
+const MessageBox = styled.div<MessageProps>`
+  background-color: ${(props) => (props.fromSelf ? '#256bb3' : '#6B7280')};
+  color: white;
+  padding: 0.7rem;
+  display: flex;
+  align-items: center;
+  min-height: 55px;
+  border-radius: 5px;
+  width: 70%;
+  gap: 5px;
+  align-self: ${(props) => (props.fromSelf ? 'end' : 'start')};
+`;
+
+const MsgText = styled.div`
+  flex: 1;
+`;
+
+const TextFrom = styled.p`
+  font-size: 9px;
+  align-self: start;
 `;
 
 const NewMessage = styled.div`
@@ -71,26 +104,36 @@ const MessageInput = styled.input`
 `;
 
 const SendButton = styled.button``;
+
 const ChatText = ({ userName, state }: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [mess, setMess] = useState<string>('');
+  const lastMessageRef = useRef<null | HTMLDivElement>(null);
+
   const socket = useSocket();
-  const { loggedUsers } = useUsers();
+  const { loggedUsers, setLoggedUsers } = useUsers();
+  console.log(socket?.id);
 
   useEffect(() => {
     if (socket == null) return;
 
     socket.on('private message', listenerMessage);
+
     return () => {
       socket.off('private message', listenerMessage);
     };
   });
 
+  useEffect(() => {
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
   const listenerMessage = async (msgInfo: any) => {
-    console.log(msgInfo);
-    console.log(msgInfo.from);
-    for (let i = 0; i < loggedUsers.length; i++) {
-      const user = loggedUsers[i];
+    const usersList = [...loggedUsers];
+    for (let i = 0; i < usersList.length; i++) {
+      let user = usersList[i];
       if (user.userID === msgInfo.from) {
         user.messages.push({
           message: msgInfo.message,
@@ -100,7 +143,8 @@ const ChatText = ({ userName, state }: Props) => {
         if (user !== state.userID) {
           user.hasNewMessages = true;
         }
-        getMessages();
+        console.log(loggedUsers, 'onprivatemessage');
+        setLoggedUsers(usersList);
         break;
       }
     }
@@ -113,24 +157,19 @@ const ChatText = ({ userName, state }: Props) => {
         message: mess,
         to: state.userID,
       });
-      for (let i = 0; i < loggedUsers.length; i++) {
-        const user = loggedUsers[i];
+      const usersList = [...loggedUsers];
+      for (let i = 0; i < usersList.length; i++) {
+        let user = usersList[i];
         if (user.userID === state.userID) {
           user.messages.push({ message: mess, fromSelf: true });
-          console.log(user);
+          console.log(loggedUsers, 'onmessage');
         }
       }
-      getMessages();
+      setLoggedUsers(usersList);
+      console.log(loggedUsers);
     }
 
     setMess('');
-  };
-
-  const getMessages = () => {
-    const selUser = loggedUsers.find((user) => {
-      return user.userID === state.userID;
-    });
-    setMessages(selUser.messages);
   };
 
   return (
@@ -140,9 +179,23 @@ const ChatText = ({ userName, state }: Props) => {
         {userName}
       </ChatHeader>
       <Container>
-        {messages.map((m) => {
-          return <p key={uuidv4()}>{m.message}</p>;
-        })}
+        {loggedUsers
+          .filter((item) => item.userID === state.userID)
+          .map((item) => {
+            return item.messages.map((i: any, index: number) => {
+              const lastMessage = item.messages.length - 1 === index;
+              return (
+                <MessageBox
+                  ref={lastMessage ? lastMessageRef : null}
+                  fromSelf={i.fromSelf}
+                >
+                  <TextFrom>{i.fromSelf ? 'me' : userName}</TextFrom>
+
+                  <MsgText>{i.message}</MsgText>
+                </MessageBox>
+              );
+            });
+          })}
       </Container>
       <NewMessage>
         <NewMessageForm
@@ -151,6 +204,7 @@ const ChatText = ({ userName, state }: Props) => {
           }}
         >
           <MessageInput
+            value={mess}
             onChange={(e) => {
               setMess(e.target.value);
             }}
