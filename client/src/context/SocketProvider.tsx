@@ -8,7 +8,11 @@ import {
 import { io, Socket } from 'socket.io-client';
 import { useUsers } from './UsersProvider';
 
-const SocketContext = createContext<Socket | null>(null);
+interface ISocket extends Socket {
+  userID?: string;
+}
+
+const SocketContext = createContext<ISocket | null>(null);
 
 export const useSocket = () => {
   return useContext(SocketContext);
@@ -20,11 +24,13 @@ interface Props {
 }
 
 export const SocketProvider = ({ children }: Props) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<ISocket | null>(null);
   const { loggedUsers } = useUsers();
 
   useEffect(() => {
-    const newSocket = io('http://localhost:4000', { autoConnect: false });
+    const newSocket: ISocket = io('http://localhost:4000', {
+      autoConnect: false,
+    });
 
     //for development only...
     newSocket.onAny((event, ...args) => {
@@ -32,7 +38,6 @@ export const SocketProvider = ({ children }: Props) => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Connected ');
       console.log('logged: ', loggedUsers);
     });
 
@@ -41,6 +46,14 @@ export const SocketProvider = ({ children }: Props) => {
         console.log('Neki ne štima');
       }
     });
+
+    newSocket.on('session', ({ sessionID, userID, userName }) => {
+      console.log(userName);
+      newSocket.auth = { sessionID };
+      localStorage.setItem('sessionID', sessionID);
+      newSocket.userID = userID;
+    });
+
     setSocket(newSocket);
 
     return () => {

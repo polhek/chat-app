@@ -5,6 +5,7 @@ export interface IState {
   loading: boolean;
   user: User | null;
   error: Error | null;
+  selectedUserId: String | null;
 }
 
 export const initialState = {
@@ -12,6 +13,7 @@ export const initialState = {
   loading: false,
   user: null,
   error: null,
+  selectedUserId: null,
 };
 
 export enum actionTypes {
@@ -19,6 +21,7 @@ export enum actionTypes {
   LOG_OUT = 'LOG_OUT',
   REQUEST_LOGIN = 'REQUEST_LOGIN',
   LOGIN_ERROR = 'LOGIN_ERROR',
+  SELECT_USER = 'SELECT_USER',
 }
 
 export type IAction =
@@ -35,6 +38,10 @@ export type IAction =
   | {
       type: actionTypes.LOGIN_ERROR;
       error: Error | null;
+    }
+  | {
+      type: actionTypes.SELECT_USER;
+      selectedUserId: string;
     };
 
 export const userReducer = (state: IState, action: IAction): IState => {
@@ -47,6 +54,9 @@ export const userReducer = (state: IState, action: IAction): IState => {
       return { ...state, isAuth: false, user: null };
     case actionTypes.LOGIN_ERROR: {
       return { ...state, loading: false, error: action.error };
+    }
+    case actionTypes.SELECT_USER: {
+      return { ...state, selectedUserId: action.selectedUserId };
     }
     default:
       return state;

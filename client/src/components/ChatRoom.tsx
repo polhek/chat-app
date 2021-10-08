@@ -1,5 +1,8 @@
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { FiberManualRecord } from '@material-ui/icons';
+import { useAuthDispatch } from '../context/userContext';
+import { selectUser } from '../context/actions';
 interface Props {}
 
 const Contact = styled.div`
@@ -32,8 +35,14 @@ const Avatar = styled.img`
 
 const Info = styled.div`
   display: flex;
+  align-items: center;
   flex-direction: column;
   justify-content: center;
+`;
+
+const Status = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const Username = styled.h3`
@@ -79,6 +88,13 @@ interface Props {
 }
 
 const ChatRoom = ({ userName, userID, status, messages }: Props) => {
+  const authDispatch = useAuthDispatch();
+
+  const chooseUser = () => {
+    let payload = { selectedUserId: userID };
+    selectUser(authDispatch, payload);
+  };
+
   return (
     <Contact>
       <Left>
@@ -89,7 +105,17 @@ const ChatRoom = ({ userName, userID, status, messages }: Props) => {
         />
         <Info>
           <Username>{userName}</Username>
-          <LastMessage>{status.toString()}</LastMessage>
+          <LastMessage>
+            {status ? (
+              <Status>
+                <FiberManualRecord style={{ color: 'Green' }} /> Online
+              </Status>
+            ) : (
+              <Status>
+                <FiberManualRecord style={{ color: 'Red' }} /> Offline
+              </Status>
+            )}
+          </LastMessage>
         </Info>
       </Left>
       <Right>
@@ -100,7 +126,7 @@ const ChatRoom = ({ userName, userID, status, messages }: Props) => {
             state: { userID, userName, messages },
           }}
         >
-          <JoinChat>Join</JoinChat>
+          <JoinChat onClick={() => chooseUser()}>Join</JoinChat>
         </Link>
       </Right>
     </Contact>

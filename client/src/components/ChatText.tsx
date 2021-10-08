@@ -1,6 +1,7 @@
 import React, {
   MutableRefObject,
   RefObject,
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -10,6 +11,7 @@ import { ArrowBack, Send } from '@material-ui/icons';
 import { useSocket } from '../context/SocketProvider';
 import { useUsers } from '../context/UsersProvider';
 import { v4 as uuidv4 } from 'uuid';
+import { useAuthDispatch, UserContext } from '../context/userContext';
 
 interface State {
   userID: string;
@@ -109,10 +111,9 @@ const ChatText = ({ userName, state }: Props) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [mess, setMess] = useState<string>('');
   const lastMessageRef = useRef<null | HTMLDivElement>(null);
-
+  const { value } = useContext(UserContext);
   const socket = useSocket();
   const { loggedUsers, setLoggedUsers } = useUsers();
-  console.log(socket?.id);
 
   useEffect(() => {
     if (socket == null) return;
@@ -139,10 +140,11 @@ const ChatText = ({ userName, state }: Props) => {
           message: msgInfo.message,
           fromSelf: false,
         });
-
-        if (user !== state.userID) {
+        //check if selected user id is the same....
+        if (user.userID !== value.selectedUserId) {
           user.hasNewMessages = true;
         }
+        console.log(user);
         console.log(loggedUsers, 'onprivatemessage');
         setLoggedUsers(usersList);
         break;

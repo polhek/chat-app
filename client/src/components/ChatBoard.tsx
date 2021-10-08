@@ -29,8 +29,9 @@ const ChatBoard = (props: Props) => {
 
   useEffect(() => {
     if (socket == null) return;
-
+    console.log(loggedUsers);
     socket.on('users', (users) => {
+      console.log(users);
       const socketID: string = socket.id;
       sortUsers(users, socketID);
     });

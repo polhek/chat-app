@@ -32,7 +32,16 @@ app.get('/', (req, res) => {
 });
 app.use('/api/auth', authRoute);
 
+process.on('uncaughtException', function (err) {
+  console.error(new Date().toUTCString() + ' uncaughtException:', err.message);
+  console.error(err.stack);
+  // Send the error log to your email
+
+  process.exit(1);
+});
+
 // server listening on port 5000...
 server.listen(4000, () => {
+ 
   console.log('Server running on port 4000!');
 });
