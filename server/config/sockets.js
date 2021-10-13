@@ -79,6 +79,7 @@ exports.onConnection = () => {
     socket.emit('session', {
       sessionID: socket.sessionID,
       userID: socket.userID,
+      userName: socket.userName,
     });
 
     console.log('emit end');
@@ -99,11 +100,10 @@ exports.onConnection = () => {
     socket.emit('users', users);
 
     socket.on('private-message', ({ message, to }) => {
-      console.log(to);
-      console.log(socket.userID);
       socket.to(to).to(socket.userID).emit('private message', {
         message,
         from: socket.userID,
+        to,
       });
     });
   });

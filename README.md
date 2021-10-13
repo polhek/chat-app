@@ -2,7 +2,5 @@
 
 ## Todo:
 
-- [ ] design of login form
-- [ ] mongoDB user model
-- [ ] socket.io connection
-- [ ] make private rooms between contacts
+- [ ] get user from localStorage, if user in localStorage exists, get it from localStorage and
+  set isAuth=true.

@@ -188,6 +188,7 @@ const ChatText = ({ userName, state }: Props) => {
               const lastMessage = item.messages.length - 1 === index;
               return (
                 <MessageBox
+                  key={uuidv4()}
                   ref={lastMessage ? lastMessageRef : null}
                   fromSelf={i.fromSelf}
                 >

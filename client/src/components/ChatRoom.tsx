@@ -50,7 +50,7 @@ const Username = styled.h3`
   font-weight: 500;
 `;
 
-const LastMessage = styled.p`
+const LastMessage = styled.div`
   font-size: 0.875rem;
 `;
 

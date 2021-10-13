@@ -42,6 +42,5 @@ process.on('uncaughtException', function (err) {
 
 // server listening on port 5000...
 server.listen(4000, () => {
- 
   console.log('Server running on port 4000!');
 });

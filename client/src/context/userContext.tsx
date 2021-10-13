@@ -19,7 +19,7 @@ interface Props {
 
 export const UserProvider = ({ children, initialState }: Props) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
-
+  console.log(state, 'state:');
   return (
     <UserContext.Provider value={{ value: state, dispatch }}>
       {children}

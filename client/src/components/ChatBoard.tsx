@@ -29,7 +29,8 @@ const ChatBoard = (props: Props) => {
 
   useEffect(() => {
     if (socket == null) return;
-    console.log(loggedUsers);
+    console.log('started');
+    console.log(socket);
     socket.on('users', (users) => {
       console.log(users);
       const socketID: string = socket.id;
@@ -37,7 +38,7 @@ const ChatBoard = (props: Props) => {
     });
 
     socket.on('user-connected', (user: any) => {
-      addUser(user); //todo
+      addUser(user); //TODO:
     });
 
     socket.on('disconnect', () => {
@@ -83,7 +84,7 @@ const ChatBoard = (props: Props) => {
     return () => {
       socket.off('users');
     };
-  });
+  }, [socket]);
 
   return (
     <Wrapper>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router';
+import { Redirect, useHistory } from 'react-router';
 import styled from 'styled-components';
 import { userLogin } from '../context/actions';
+import { useSocket } from '../context/SocketProvider';
 import { useAuthDispatch } from '../context/userContext';
 
 const Wrapper = styled.div`
@@ -75,17 +76,25 @@ interface Props {}
 const LoginForm = (props: Props) => {
   let history = useHistory();
   const [user, setUsername] = useState<String>('');
-
+  const socket = useSocket();
   const authDispatch = useAuthDispatch();
-
+  //TODO: LOGIN redirect
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let payload = { userName: user };
     try {
       let response = await userLogin(authDispatch, payload);
       if (!response.user) return;
-      history.push('/');
-    } catch (error) {}
+      const user = response.user;
+      if (socket) {
+        socket.auth = { userName: user.userName };
+        socket.connect();
+        console.log(history);
+        history.push('/');
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
