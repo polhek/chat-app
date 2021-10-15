@@ -113,7 +113,7 @@ const ChatText = ({ userName, state }: Props) => {
   const lastMessageRef = useRef<null | HTMLDivElement>(null);
   const { value } = useContext(UserContext);
   const socket = useSocket();
-  const { loggedUsers, setLoggedUsers } = useUsers();
+  const { connectedUsers, setLoggedUsers } = useUsers();
 
   useEffect(() => {
     if (socket == null) return;
@@ -132,7 +132,8 @@ const ChatText = ({ userName, state }: Props) => {
   });
 
   const listenerMessage = async (msgInfo: any) => {
-    const usersList = [...loggedUsers];
+    const usersList = [...connectedUsers];
+    console.log('listmsg:', usersList);
     for (let i = 0; i < usersList.length; i++) {
       let user = usersList[i];
       if (user.userID === msgInfo.from) {
@@ -145,7 +146,8 @@ const ChatText = ({ userName, state }: Props) => {
           user.hasNewMessages = true;
         }
         console.log(user);
-        console.log(loggedUsers, 'onprivatemessage');
+        console.log(connectedUsers, 'onprivatemessage');
+
         setLoggedUsers(usersList);
         break;
       }
@@ -159,16 +161,16 @@ const ChatText = ({ userName, state }: Props) => {
         message: mess,
         to: state.userID,
       });
-      const usersList = [...loggedUsers];
+      const usersList = [...connectedUsers];
       for (let i = 0; i < usersList.length; i++) {
         let user = usersList[i];
         if (user.userID === state.userID) {
           user.messages.push({ message: mess, fromSelf: true });
-          console.log(loggedUsers, 'onmessage');
+          console.log(connectedUsers, 'onmessage');
         }
       }
       setLoggedUsers(usersList);
-      console.log(loggedUsers);
+      console.log('onmessage', connectedUsers);
     }
 
     setMess('');
@@ -181,7 +183,7 @@ const ChatText = ({ userName, state }: Props) => {
         {userName}
       </ChatHeader>
       <Container>
-        {loggedUsers
+        {connectedUsers
           .filter((item) => item.userID === state.userID)
           .map((item) => {
             return item.messages.map((i: any, index: number) => {

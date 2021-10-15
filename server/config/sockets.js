@@ -13,26 +13,6 @@ exports.socketConnection = (server) => {
       origin: 'http://localhost:3000',
     },
   });
-
-  io.on('connection', (socket) => {
-    console.log('User is connected!');
-
-    socket.on('disconnect', async () => {
-      console.log(`User socket ${socket.id} has disconnected!`);
-      const matchSocket = await io.in(socket.id).allSockets();
-
-      const isDisconnected = matchSocket.size === 0;
-      if (isDisconnected) {
-        socket.broadcast.emit('user-disconnected', socket.userID);
-
-        sessionStore.saveSession(socket.sessionID, {
-          userID: socket.userID,
-          userName: socket.userName,
-          connected: false,
-        });
-      }
-    });
-  });
 };
 
 exports.userAuth = () => {
@@ -87,17 +67,23 @@ exports.onConnection = () => {
     socket.join(socket.userID);
 
     const users = [];
+
     sessionStore.findAllSessions().forEach((session) => {
       users.push({
         userID: session.userID,
         userName: session.userName,
-        messages: [],
-        self: false,
         connected: session.connected,
       });
     });
+    console.log(users);
 
     socket.emit('users', users);
+
+    socket.broadcast.emit('user-connected', {
+      userID: socket.userID,
+      userName: socket.userName,
+      connected: true,
+    });
 
     socket.on('private-message', ({ message, to }) => {
       socket.to(to).to(socket.userID).emit('private message', {
@@ -106,18 +92,22 @@ exports.onConnection = () => {
         to,
       });
     });
-  });
-};
 
-exports.notifyUsers = () => {
-  io.on('connection', (socket) => {
-    console.log('user joined ', socket.id);
-    socket.broadcast.emit('user-connected', {
-      userID: socket.id,
-      userName: socket.userName,
-      messages: [],
-      self: false,
-      connected: true,
+    socket.on('disconnect', async () => {
+      console.log(`User socket ${socket.id} has disconnected!`);
+      const matchSocket = await io.in(socket.userID).allSockets();
+
+      const isDisconnected = matchSocket.size === 0;
+      if (isDisconnected) {
+        console.log(socket.userID);
+        socket.broadcast.emit('user-disconnected', socket.userID);
+
+        sessionStore.saveSession(socket.sessionID, {
+          userID: socket.userID,
+          userName: socket.userName,
+          connected: false,
+        });
+      }
     });
   });
 };

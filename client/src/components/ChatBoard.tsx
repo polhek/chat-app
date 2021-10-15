@@ -25,71 +25,68 @@ interface Props {}
 const ChatBoard = (props: Props) => {
   //const [loggedUsers, setLoggedUsers] = useState<any[]>([]);
   const socket = useSocket();
-  const { loggedUsers, setLoggedUsers, addUser, sortUsers } = useUsers();
+  const { connectedUsers, setLoggedUsers, addUser, sortUsers } = useUsers();
+  console.log(connectedUsers);
+  console.log(useUsers());
 
   useEffect(() => {
     if (socket == null) return;
-    console.log('started');
-    console.log(socket);
+
     socket.on('users', (users) => {
       console.log(users);
-      const socketID: string = socket.id;
-      sortUsers(users, socketID);
+      if (socket.userID) {
+        const socketID: string = socket?.userID;
+        sortUsers(users, socketID);
+      }
     });
 
     socket.on('user-connected', (user: any) => {
-      addUser(user); //TODO:
+      console.log(user, 'this user connected!');
+      const connectingUser = user;
+      addUser(connectingUser);
     });
 
-    socket.on('disconnect', () => {
-      console.log('disconnect');
-      const users = [...loggedUsers];
-      users.forEach((user) => {
-        if (user.self === true) {
-          user.connected = false;
-        }
-      });
-      setLoggedUsers(users);
-    });
+    // socket.on('disconnect', () => {
+    //   console.log('disconnect');
+    //   const users = [...loggedUsers];
+    //   users.forEach((user) => {
+    //     if (user.self === true) {
+    //       user.connected = false;
+    //     }
+    //   });
+    //   setLoggedUsers(users);
+    // });
 
-    socket.on('connect', () => {
-      const users = [...loggedUsers];
-      users.forEach((u) => {
-        if (u.self) {
-          u.connected = true;
-        }
-      });
-      setLoggedUsers(users);
-    });
-
-    socket.on('disconnect', () => {
-      const users = [...loggedUsers];
-      users.forEach((u) => {
-        if (u.self) {
-          u.connected = false;
-        }
-      });
-      setLoggedUsers(users);
-    });
+    // socket.on('connect', () => {
+    //   const users = [...loggedUsers];
+    //   users.forEach((u) => {
+    //     if (u.self) {
+    //       u.connected = true;
+    //     }
+    //   });
+    //   setLoggedUsers(users);
+    // });
 
     socket.on('user-disconnected', (userID) => {
-      const users = [...loggedUsers];
+      console.log('disconnected user');
+      const users = [...connectedUsers];
       users.forEach((u) => {
         if (u.userID === userID) {
           u.connected = false;
+          setLoggedUsers([...users]);
         }
       });
-      setLoggedUsers(users);
     });
     return () => {
       socket.off('users');
+      socket.off('user-connected');
     };
   }, [socket]);
 
   return (
     <Wrapper>
       <Container>
-        {loggedUsers.map((u) => {
+        {connectedUsers.map((u) => {
           return (
             <ChatRoom
               key={u.userID}

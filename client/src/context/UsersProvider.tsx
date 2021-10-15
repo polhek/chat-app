@@ -7,14 +7,14 @@ import React, {
 import { useSocket } from './SocketProvider';
 
 export const inState = {
-  loggedUsers: [],
+  connectedUsers: [],
   addUser: (user: any) => {},
   sortUsers: (user: any, socketID: string) => {},
   setLoggedUsers: () => {},
 };
 
 export interface initState {
-  loggedUsers: any[];
+  connectedUsers: any[];
   addUser(user: any): void;
   sortUsers(users: any, socketID: string): void;
   setLoggedUsers: React.Dispatch<React.SetStateAction<any[]>>;
@@ -30,38 +30,67 @@ interface Props {
   children: ReactElement;
 }
 
+const initReactiveProperties = (user: any) => {
+  user.messages = [];
+  user.hasNewMessages = false;
+};
+
 export const UsersProvider = ({ children }: Props) => {
-  const [loggedUsers, setLoggedUsers] = useState<any[]>([]);
-  const socket = useSocket();
+  const [connectedUsers, setLoggedUsers] = useState<any[]>([]);
 
   const addUser = (user: any) => {
-    console.log(typeof loggedUsers);
-    const users: any[] = [...loggedUsers];
-    users.push(user);
-    setLoggedUsers(users);
+    console.log('add', connectedUsers);
+
+    // const copyLoggedUsers = [...loggedUsers];
+
+    // console.log('copy of loggedUsers length', copyLoggedUsers.length);
+    // console.log(user.userID, '"ADD USER: USER"');
+    // if (copyLoggedUsers.length > 1) {
+    //   for (let i = 0; i < copyLoggedUsers.length; i++) {
+    //     let existingUser = copyLoggedUsers[i];
+    //     if (existingUser.userID === user.userID) {
+    //       console.log('existing user!!!!', existingUser);
+    //       existingUser.connected = true;
+    //       setLoggedUsers([...copyLoggedUsers]);
+    //       return;
+    //     }
+    //   }
+    // }
+
+    // initReactiveProperties(user);
+    // copyLoggedUsers.push({ ...user });
+    // console.log('copyafter', copyLoggedUsers);
+    // setLoggedUsers([...copyLoggedUsers]);
   };
 
-  const sortUsers = (users: any, socketID: string) => {
-    const usersCopy = [...users];
-    console.log('users copy: ', usersCopy);
-    console.log('socketid', socketID);
-    usersCopy.forEach((user: any) => {
-      user.self = user.userID === socketID;
-    });
+  const sortUsers = (users: any, socketUserID: string) => {
+    const usersCopy = users;
 
-    let sorted = users.sort((a: any, b: any) => {
+    usersCopy.forEach((u: any) => {
+      for (let i = 0; i < usersCopy.length; i++) {
+        const existingUser = usersCopy[i];
+        if (existingUser.userID === u.userID) {
+          existingUser.connected = u.connected;
+          break;
+        }
+      }
+      u.self = u.userID === socketUserID;
+      initReactiveProperties(u);
+    });
+    // put the current user first, and sort by username
+    let sorted = usersCopy.sort((a: any, b: any) => {
       if (a.self) return -1;
       if (b.self) return 1;
       if (a.username < b.username) return -1;
       return a.username > b.username ? 1 : 0;
     });
-    console.log('sorted', sorted);
+
     setLoggedUsers([...sorted]);
   };
 
   return (
     <UsersContext.Provider
-      value={{ loggedUsers, setLoggedUsers, addUser, sortUsers }}
+      value={{ connectedUsers, setLoggedUsers, addUser, sortUsers }}
     >
       {children}
     </UsersContext.Provider>

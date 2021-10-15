@@ -78,7 +78,7 @@ const LoginForm = (props: Props) => {
   const [user, setUsername] = useState<String>('');
   const socket = useSocket();
   const authDispatch = useAuthDispatch();
-  //TODO: LOGIN redirect
+
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let payload = { userName: user };

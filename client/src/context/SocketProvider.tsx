@@ -19,13 +19,12 @@ export const useSocket = () => {
 };
 
 interface Props {
-  //id: String;
   children: ReactElement;
 }
 
 export const SocketProvider = ({ children }: Props) => {
   const [socket, setSocket] = useState<ISocket | null>(null);
-  const { loggedUsers } = useUsers();
+  const { connectedUsers } = useUsers();
 
   useEffect(() => {
     const newSocket: ISocket = io('http://localhost:4000', {
@@ -38,7 +37,7 @@ export const SocketProvider = ({ children }: Props) => {
     });
 
     newSocket.on('connect', () => {
-      console.log('logged: ', loggedUsers);
+      console.log('logged: ', connectedUsers);
     });
 
     newSocket.on('connect_error', (err) => {
@@ -48,7 +47,6 @@ export const SocketProvider = ({ children }: Props) => {
     });
 
     newSocket.on('session', ({ sessionID, userID, userName }) => {
-      console.log(userName);
       newSocket.auth = { sessionID };
       localStorage.setItem('sessionID', sessionID);
       newSocket.userID = userID;

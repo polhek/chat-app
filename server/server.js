@@ -7,7 +7,6 @@ const {
   socketConnection,
   userAuth,
   onConnection,
-  notifyUsers,
 } = require('./config/sockets');
 require('dotenv').config();
 import './config/mongo';
@@ -22,7 +21,6 @@ const server = http.createServer(app);
 socketConnection(server);
 userAuth();
 onConnection();
-notifyUsers();
 
 app.use(express.json());
 app.use(cors());

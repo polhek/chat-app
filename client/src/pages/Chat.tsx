@@ -10,7 +10,6 @@ const Chat = (props: Props) => {
   const { userName } = useParams<{ userName: string }>();
   const { state } = useLocation();
   // state je user id // username je iz params
-  //TODO: izgled za chat z userjem...
 
   return (
     <>
