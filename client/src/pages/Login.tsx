@@ -1,7 +1,5 @@
-import { useEffect } from 'react';
 import LoginForm from '../components/LoginForm';
 import Navbar from '../components/Navbar';
-import { useSocket } from '../context/SocketProvider';
 
 interface Props {}
 

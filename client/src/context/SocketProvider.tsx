@@ -6,7 +6,6 @@ import {
   useState,
 } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useUsers } from './UsersProvider';
 
 interface ISocket extends Socket {
   userID?: string;
@@ -24,7 +23,6 @@ interface Props {
 
 export const SocketProvider = ({ children }: Props) => {
   const [socket, setSocket] = useState<ISocket | null>(null);
-  const { connectedUsers } = useUsers();
 
   useEffect(() => {
     const newSocket: ISocket = io('http://localhost:4000', {
@@ -34,10 +32,6 @@ export const SocketProvider = ({ children }: Props) => {
     //for development only...
     newSocket.onAny((event, ...args) => {
       console.log(event, args);
-    });
-
-    newSocket.on('connect', () => {
-      console.log('logged: ', connectedUsers);
     });
 
     newSocket.on('connect_error', (err) => {

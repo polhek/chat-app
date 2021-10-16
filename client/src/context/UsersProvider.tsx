@@ -4,7 +4,6 @@ import React, {
   useContext,
   useState,
 } from 'react';
-import { useSocket } from './SocketProvider';
 
 export const inState = {
   connectedUsers: [],
@@ -39,28 +38,21 @@ export const UsersProvider = ({ children }: Props) => {
   const [connectedUsers, setLoggedUsers] = useState<any[]>([]);
 
   const addUser = (user: any) => {
-    console.log('add', connectedUsers);
+    setLoggedUsers((oldUsers) => {
+      const newUsers: any[] = [...oldUsers];
+      console.log(newUsers);
+      for (let i = 0; i < newUsers.length; i++) {
+        const existingUser = newUsers[i];
+        if (existingUser.userID === user.userID) {
+          existingUser.connected = true;
 
-    // const copyLoggedUsers = [...loggedUsers];
-
-    // console.log('copy of loggedUsers length', copyLoggedUsers.length);
-    // console.log(user.userID, '"ADD USER: USER"');
-    // if (copyLoggedUsers.length > 1) {
-    //   for (let i = 0; i < copyLoggedUsers.length; i++) {
-    //     let existingUser = copyLoggedUsers[i];
-    //     if (existingUser.userID === user.userID) {
-    //       console.log('existing user!!!!', existingUser);
-    //       existingUser.connected = true;
-    //       setLoggedUsers([...copyLoggedUsers]);
-    //       return;
-    //     }
-    //   }
-    // }
-
-    // initReactiveProperties(user);
-    // copyLoggedUsers.push({ ...user });
-    // console.log('copyafter', copyLoggedUsers);
-    // setLoggedUsers([...copyLoggedUsers]);
+          return newUsers;
+        }
+      }
+      initReactiveProperties(user);
+      newUsers.push(user);
+      return newUsers;
+    });
   };
 
   const sortUsers = (users: any, socketUserID: string) => {
@@ -77,14 +69,13 @@ export const UsersProvider = ({ children }: Props) => {
       u.self = u.userID === socketUserID;
       initReactiveProperties(u);
     });
-    // put the current user first, and sort by username
+    // sort users, put yourself on first place.
     let sorted = usersCopy.sort((a: any, b: any) => {
       if (a.self) return -1;
       if (b.self) return 1;
       if (a.username < b.username) return -1;
       return a.username > b.username ? 1 : 0;
     });
-
     setLoggedUsers([...sorted]);
   };
 

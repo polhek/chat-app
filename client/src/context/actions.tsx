@@ -28,14 +28,8 @@ export const logOut = async (dispatch: any) => {
 };
 
 export const selectUser = (dispatch: any, loginPayload: any) => {
-  console.log(loginPayload);
   dispatch({
     type: 'SELECT_USER',
     selectedUserId: loginPayload.selectedUserId,
   });
-};
-
-// TODO: check if user already exists
-export const checkUser = (dispatch: any, loginPayload: any) => {
-  //TODO: !!!
 };

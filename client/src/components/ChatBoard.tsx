@@ -23,15 +23,12 @@ const Container = styled.div`
 interface Props {}
 
 const ChatBoard = (props: Props) => {
-  //const [loggedUsers, setLoggedUsers] = useState<any[]>([]);
   const socket = useSocket();
   const { connectedUsers, setLoggedUsers, addUser, sortUsers } = useUsers();
-  console.log(connectedUsers);
-  console.log(useUsers());
 
   useEffect(() => {
     if (socket == null) return;
-
+    console.log(typeof connectedUsers);
     socket.on('users', (users) => {
       console.log(users);
       if (socket.userID) {
@@ -41,47 +38,46 @@ const ChatBoard = (props: Props) => {
     });
 
     socket.on('user-connected', (user: any) => {
-      console.log(user, 'this user connected!');
-      const connectingUser = user;
-      addUser(connectingUser);
+      addUser(user);
     });
 
-    // socket.on('disconnect', () => {
-    //   console.log('disconnect');
-    //   const users = [...loggedUsers];
-    //   users.forEach((user) => {
-    //     if (user.self === true) {
-    //       user.connected = false;
-    //     }
-    //   });
-    //   setLoggedUsers(users);
-    // });
+    socket.on('disconnect', () => {
+      console.log('disconnect');
+      const users = [...connectedUsers];
+      users.forEach((user) => {
+        if (user.self === true) {
+          user.connected = false;
+        }
+      });
+      setLoggedUsers(users);
+    });
 
-    // socket.on('connect', () => {
-    //   const users = [...loggedUsers];
-    //   users.forEach((u) => {
-    //     if (u.self) {
-    //       u.connected = true;
-    //     }
-    //   });
-    //   setLoggedUsers(users);
-    // });
-
-    socket.on('user-disconnected', (userID) => {
-      console.log('disconnected user');
+    socket.on('connect', () => {
       const users = [...connectedUsers];
       users.forEach((u) => {
-        if (u.userID === userID) {
-          u.connected = false;
-          setLoggedUsers([...users]);
+        if (u.self) {
+          u.connected = true;
         }
+      });
+      setLoggedUsers(users);
+    });
+
+    socket.on('user-disconnected', (userID) => {
+      setLoggedUsers((oldUsers) => {
+        const newUsers = [...oldUsers];
+        newUsers.forEach((u) => {
+          if (u.userID === userID) {
+            u.connected = false;
+          }
+        });
+        return newUsers;
       });
     });
     return () => {
       socket.off('users');
       socket.off('user-connected');
     };
-  }, [socket]);
+  }, [socket, addUser, connectedUsers, setLoggedUsers, sortUsers]);
 
   return (
     <Wrapper>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { RouteComponentProps, useLocation, useParams } from 'react-router';
-import styled from 'styled-components';
+import { useLocation, useParams } from 'react-router';
+
 import ChatText from '../components/ChatText';
 import Navbar from '../components/Navbar';
 

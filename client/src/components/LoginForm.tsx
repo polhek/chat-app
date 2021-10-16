@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Redirect, useHistory } from 'react-router';
+import { useHistory } from 'react-router';
 import styled from 'styled-components';
 import { userLogin } from '../context/actions';
 import { useSocket } from '../context/SocketProvider';

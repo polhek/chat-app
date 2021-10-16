@@ -1,6 +1,5 @@
 import React, {
-  MutableRefObject,
-  RefObject,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -11,7 +10,8 @@ import { ArrowBack, Send } from '@material-ui/icons';
 import { useSocket } from '../context/SocketProvider';
 import { useUsers } from '../context/UsersProvider';
 import { v4 as uuidv4 } from 'uuid';
-import { useAuthDispatch, UserContext } from '../context/userContext';
+import { UserContext } from '../context/userContext';
+import { useHistory } from 'react-router-dom';
 
 interface State {
   userID: string;
@@ -21,11 +21,6 @@ interface State {
 interface Props {
   userName: string;
   state: State | any;
-}
-
-interface Message {
-  userName: string;
-  message: string;
 }
 
 interface MessageProps {
@@ -105,15 +100,53 @@ const MessageInput = styled.input`
   font-size: 0.9rem;
 `;
 
+const BackButton = styled.button`
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  padding: 5px;
+  &:hover {
+    background: white;
+    color: #256bb3;
+  }
+`;
+
 const SendButton = styled.button``;
 
 const ChatText = ({ userName, state }: Props) => {
-  const [messages, setMessages] = useState<any[]>([]);
   const [mess, setMess] = useState<string>('');
   const lastMessageRef = useRef<null | HTMLDivElement>(null);
+
+  // contexts
   const { value } = useContext(UserContext);
   const socket = useSocket();
   const { connectedUsers, setLoggedUsers } = useUsers();
+
+  const history = useHistory();
+
+  const listenerMessage = useCallback(
+    async (msgInfo: any) => {
+      const usersList = [...connectedUsers];
+      for (let i = 0; i < usersList.length; i++) {
+        let user = usersList[i];
+        if (user.userID === msgInfo.from) {
+          user.messages.push({
+            message: msgInfo.message,
+            fromSelf: false,
+          });
+          //check if selected user id is the same....
+          if (user.userID !== value.selectedUserId) {
+            user.hasNewMessages = true;
+          }
+          setLoggedUsers(usersList);
+          break;
+        }
+      }
+    },
+    [connectedUsers, setLoggedUsers, value.selectedUserId]
+  );
 
   useEffect(() => {
     if (socket == null) return;
@@ -123,36 +156,13 @@ const ChatText = ({ userName, state }: Props) => {
     return () => {
       socket.off('private message', listenerMessage);
     };
-  });
+  }, [socket, listenerMessage]);
 
   useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   });
-
-  const listenerMessage = async (msgInfo: any) => {
-    const usersList = [...connectedUsers];
-    console.log('listmsg:', usersList);
-    for (let i = 0; i < usersList.length; i++) {
-      let user = usersList[i];
-      if (user.userID === msgInfo.from) {
-        user.messages.push({
-          message: msgInfo.message,
-          fromSelf: false,
-        });
-        //check if selected user id is the same....
-        if (user.userID !== value.selectedUserId) {
-          user.hasNewMessages = true;
-        }
-        console.log(user);
-        console.log(connectedUsers, 'onprivatemessage');
-
-        setLoggedUsers(usersList);
-        break;
-      }
-    }
-  };
 
   const onMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -166,11 +176,9 @@ const ChatText = ({ userName, state }: Props) => {
         let user = usersList[i];
         if (user.userID === state.userID) {
           user.messages.push({ message: mess, fromSelf: true });
-          console.log(connectedUsers, 'onmessage');
         }
       }
       setLoggedUsers(usersList);
-      console.log('onmessage', connectedUsers);
     }
 
     setMess('');
@@ -179,7 +187,14 @@ const ChatText = ({ userName, state }: Props) => {
   return (
     <Wrapper>
       <ChatHeader>
-        <ArrowBack />
+        <BackButton
+          onClick={() => {
+            history.push('/');
+          }}
+        >
+          <ArrowBack />
+        </BackButton>
+
         {userName}
       </ChatHeader>
       <Container>

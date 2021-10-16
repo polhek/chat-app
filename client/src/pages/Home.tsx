@@ -12,12 +12,11 @@ const Home = (props: Props) => {
   const socket = useSocket();
   const authDispatch = useAuthDispatch();
   const { value } = useContext(UserContext);
-  const { loading, isAuth } = value;
+  const { isAuth } = value;
   const [redirect, setRedirect] = useState<boolean>(false);
 
   const checkUserLogin = useCallback(async () => {
     if (socket) {
-      console.log('tu nesmi runat');
       const sessionID = localStorage.getItem('sessionID');
       const userName = localStorage.getItem('loggedUser');
       if (sessionID && userName) {
@@ -26,12 +25,11 @@ const Home = (props: Props) => {
 
         socket.auth = { sessionID };
         socket?.connect();
-        console.log('User exists, and connection succeeded');
       } else {
         setRedirect(true);
       }
     }
-  }, [socket]);
+  }, [socket, authDispatch]);
 
   useEffect(() => {
     if (socket && !isAuth) {
