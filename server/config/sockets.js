@@ -1,10 +1,14 @@
 const { Socket } = require('socket.io');
 const { InMemorySessionStore } = require('./sessionStore');
-const sessionStore = new InMemorySessionStore();
+const { InMemoryMessageStore } = require('./messageStore');
 const crypto = require('crypto');
+
 const randomId = () => crypto.randomBytes(8).toString('hex');
 
 let io;
+
+const sessionStore = new InMemorySessionStore();
+const messageStore = new InMemoryMessageStore();
 
 exports.socketConnection = (server) => {
   io = require('socket.io')(server, {
@@ -67,12 +71,26 @@ exports.onConnection = () => {
     socket.join(socket.userID);
 
     const users = [];
+    // save messages and persist them between sessions...
+    const messagesUser = new Map();
+
+    messageStore.findMessagesForUser(socket.userID).forEach((m) => {
+      const { from, to } = m;
+      const otherUser = socket.userID === from ? to : from;
+
+      if (messagesUser.has(otherUser)) {
+        messagesUser.get(otherUser).push(m);
+      } else {
+        messagesUser.set(otherUser, [m]);
+      }
+    });
 
     sessionStore.findAllSessions().forEach((session) => {
       users.push({
         userID: session.userID,
         userName: session.userName,
         connected: session.connected,
+        messages: messagesUser.get(session.userID) || [],
       });
     });
     console.log(users);
@@ -83,14 +101,23 @@ exports.onConnection = () => {
       userID: socket.userID,
       userName: socket.userName,
       connected: true,
+      messages: [],
     });
 
     socket.on('private-message', ({ message, to }) => {
+      console.log(messagesUser);
+      const msg = {
+        message: message,
+        from: socket.userID,
+        to,
+      };
+      console.log(msg);
       socket.to(to).to(socket.userID).emit('private message', {
         message,
         from: socket.userID,
         to,
       });
+      messageStore.saveMessage(msg);
     });
 
     socket.on('disconnect', async () => {

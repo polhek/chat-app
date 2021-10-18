@@ -30,7 +30,6 @@ interface Props {
 }
 
 const initReactiveProperties = (user: any) => {
-  user.messages = [];
   user.hasNewMessages = false;
 };
 
@@ -59,10 +58,15 @@ export const UsersProvider = ({ children }: Props) => {
     const usersCopy = users;
 
     usersCopy.forEach((u: any) => {
+      u.messages.forEach((mess: any) => {
+        console.log(mess);
+        mess.fromSelf = mess.from === socketUserID;
+      });
       for (let i = 0; i < usersCopy.length; i++) {
         const existingUser = usersCopy[i];
         if (existingUser.userID === u.userID) {
           existingUser.connected = u.connected;
+          existingUser.messages = u.messages;
           break;
         }
       }

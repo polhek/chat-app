@@ -128,6 +128,7 @@ const ChatText = ({ userName, state }: Props) => {
 
   const listenerMessage = useCallback(
     async (msgInfo: any) => {
+      console.log(msgInfo);
       const usersList = [...connectedUsers];
       for (let i = 0; i < usersList.length; i++) {
         let user = usersList[i];

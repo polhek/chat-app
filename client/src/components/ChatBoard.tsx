@@ -76,6 +76,8 @@ const ChatBoard = (props: Props) => {
     return () => {
       socket.off('users');
       socket.off('user-connected');
+      socket.off('connect');
+      socket.off('user-disconnected');
     };
   }, [socket, addUser, connectedUsers, setLoggedUsers, sortUsers]);
 
